@@ -38,41 +38,129 @@ Cada verificación puede ser tratada como un manejador. Si un manejador no puede
 
 ## Pseudocódigo
 
-```python
-# Clase abstracta del Manejador
-class Manejador:
-    def __init__(self, sucesor=None):
-        self._sucesor = sucesor
+# Ejemplo del Patrón Chain of Responsibility en C#
 
-    def manejar(self, solicitud):
-        if self._puede_manejar(solicitud):
-            self._procesar(solicitud)
-        elif self._sucesor:
-            self._sucesor.manejar(solicitud)
+Este ejemplo demuestra el patrón de diseño **Chain of Responsibility** (Cadena de Responsabilidad) en C#. El patrón permite que un objeto pase una solicitud a lo largo de una cadena de manejadores potenciales hasta que la solicitud sea manejada.
 
-    def _puede_manejar(self, solicitud):
-        raise NotImplementedError
+## Código
 
-    def _procesar(self, solicitud):
-        raise NotImplementedError
+```csharp
+using System;
 
-# Manejador concreto que verifica los créditos del semestre
-class VerificadorSemestre(Manejador):
-    def _puede_manejar(self, solicitud):
-        return solicitud.semestre == 10
+namespace ChainOfResponsibilityExample
+{
+    // Clase base para los manejadores de soporte
+    public abstract class SupportHandler
+    {
+        // Manejador siguiente en la cadena
+        protected SupportHandler nextHandler;
 
-    def _procesar(self, solicitud):
-        print("Solicitud verificada para el 10mo semestre.")
+        // Establece el siguiente manejador en la cadena
+        public void SetNext(SupportHandler handler)
+        {
+            nextHandler = handler;
+        }
 
-# Manejador concreto que verifica la cantidad de créditos
-class VerificadorCreditos(Manejador):
-    def _puede_manejar(self, solicitud):
-        return solicitud.creditos >= 5
+        // Método abstracto que debe implementar cada manejador concreto
+        public abstract void HandleRequest(SupportRequest request);
+    }
 
-    def _procesar(self, solicitud):
-        print("Solicitud verificada: Créditos suficientes.")
+    // Clase que representa una solicitud de soporte
+    public class SupportRequest
+    {
+        public string Problem { get; private set; }
+        public int DifficultyLevel { get; private set; }  // Nivel de dificultad: 1 = bajo, 2 = medio, 3 = alto
 
-# Ejemplo de uso
-solicitud = Solicitud(semestre=10, creditos=6)
-cadena = VerificadorSemestre(VerificadorCreditos())
-cadena.manejar(solicitud)
+        // Constructor para inicializar las propiedades
+        public SupportRequest(string problem, int difficultyLevel)
+        {
+            Problem = problem;
+            DifficultyLevel = difficultyLevel;
+        }
+    }
+
+    // Manejador concreto para problemas simples
+    public class BasicSupport : SupportHandler
+    {
+        // Implementación del método HandleRequest para problemas de dificultad 1
+        public override void HandleRequest(SupportRequest request)
+        {
+            if (request.DifficultyLevel == 1)
+            {
+                Console.WriteLine(string.Format("BasicSupport: Resolvió el problema '{0}' de dificultad {1}", request.Problem, request.DifficultyLevel));
+            }
+            else if (nextHandler != null)
+            {
+                // Pasa la solicitud al siguiente manejador en la cadena
+                nextHandler.HandleRequest(request);
+            }
+        }
+    }
+
+    // Manejador concreto para problemas intermedios
+    public class IntermediateSupport : SupportHandler
+    {
+        // Implementación del método HandleRequest para problemas de dificultad 2
+        public override void HandleRequest(SupportRequest request)
+        {
+            if (request.DifficultyLevel == 2)
+            {
+                Console.WriteLine(string.Format("IntermediateSupport: Resolvió el problema '{0}' de dificultad {1}", request.Problem, request.DifficultyLevel));
+            }
+            else if (nextHandler != null)
+            {
+                // Pasa la solicitud al siguiente manejador en la cadena
+                nextHandler.HandleRequest(request);
+            }
+        }
+    }
+
+    // Manejador concreto para problemas avanzados
+    public class AdvancedSupport : SupportHandler
+    {
+        // Implementación del método HandleRequest para problemas de dificultad 3
+        public override void HandleRequest(SupportRequest request)
+        {
+            if (request.DifficultyLevel == 3)
+            {
+                Console.WriteLine(string.Format("AdvancedSupport: Resolvió el problema '{0}' de dificultad {1}", request.Problem, request.DifficultyLevel));
+            }
+            else
+            {
+                // Mensaje si el problema no puede ser resuelto por este manejador
+                Console.WriteLine(string.Format("AdvancedSupport: El problema '{0}' no pudo ser resuelto.", request.Problem));
+            }
+        }
+    }
+
+    // Clase principal, debe ser pública
+    public class Program
+    {
+        // Método Main, debe ser estático y público
+        public static void Main(string[] args)
+        {
+            // Configuración de la cadena de responsabilidad
+            SupportHandler basicSupport = new BasicSupport();
+            SupportHandler intermediateSupport = new IntermediateSupport();
+            SupportHandler advancedSupport = new AdvancedSupport();
+
+            // Establecemos la cadena: basicSupport -> intermediateSupport -> advancedSupport
+            basicSupport.SetNext(intermediateSupport);
+            intermediateSupport.SetNext(advancedSupport);
+
+            // Simulamos diferentes solicitudes de soporte
+            SupportRequest request1 = new SupportRequest("Reiniciar contraseña", 1);
+            SupportRequest request2 = new SupportRequest("Problema con la conexión a internet", 2);
+            SupportRequest request3 = new SupportRequest("Servidor caído", 3);
+            SupportRequest request4 = new SupportRequest("Ciberataque en curso", 4);
+
+            // Procesamos las solicitudes a través de la cadena
+            basicSupport.HandleRequest(request1);
+            basicSupport.HandleRequest(request2);
+            basicSupport.HandleRequest(request3);
+            basicSupport.HandleRequest(request4);
+
+            Console.ReadLine();  // Para mantener la consola abierta
+        }
+    }
+}
