@@ -42,6 +42,8 @@ Cada verificación puede ser tratada como un manejador. Si un manejador no puede
 
 Este ejemplo demuestra el patrón de diseño **Chain of Responsibility** (Cadena de Responsabilidad) en C#. El patrón permite que un objeto pase una solicitud a lo largo de una cadena de manejadores potenciales hasta que la solicitud sea manejada.
 
+# https://dotnetfiddle.net/7gkSDM
+
 ## Código
 
 ```csharp
